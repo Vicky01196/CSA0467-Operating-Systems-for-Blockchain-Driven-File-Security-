@@ -1,0 +1,43 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+// Function to perform case-sensitive search for the pattern
+void grepFile(FILE *file, const char *pattern) {
+    char line[1024];  // Buffer to hold each line of the file
+    int lineNumber = 0;
+    
+    // Read the file line by line
+    while (fgets(line, sizeof(line), file)) {
+        lineNumber++;
+        if (strstr(line, pattern)) {  // Search for the pattern in the line
+            printf("%d: %s", lineNumber, line);  // Print matching line with line number
+        }
+    }
+}
+
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <pattern> <file>\n", argv[0]);
+        return 1;
+    }
+
+    const char *pattern = argv[1];  // Pattern to search for
+    const char *fileName = argv[2]; // File to search in
+    
+    // Open the file for reading
+    FILE *file = fopen(fileName, "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+    
+    // Perform the search in the file
+    grepFile(file, pattern);
+
+    // Close the file after reading
+    fclose(file);
+
+    return 0;
+}

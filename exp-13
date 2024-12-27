@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_BLOCKS 5
+
+// Memory Block Structure
+typedef struct {
+    int size;
+    int is_free;
+} MemoryBlock;
+
+MemoryBlock memory[MAX_BLOCKS];
+
+// Function to initialize memory blocks
+void initialize_memory() {
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        memory[i].size = (i + 1) * 100;  // Example block sizes
+        memory[i].is_free = 1;  // Initially all blocks are free
+    }
+}
+
+// First-Fit Strategy
+int first_fit(int size) {
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        if (memory[i].is_free && memory[i].size >= size) {
+            memory[i].is_free = 0;  // Allocate memory
+            return i;
+        }
+    }
+    return -1;  // No suitable block found
+}
+
+// Best-Fit Strategy
+int best_fit(int size) {
+    int best_index = -1;
+    int min_diff = 9999;
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        if (memory[i].is_free && memory[i].size >= size) {
+            int diff = memory[i].size - size;
+            if (diff < min_diff) {
+                min_diff = diff;
+                best_index = i;
+            }
+        }
+    }
+    if (best_index != -1)
+        memory[best_index].is_free = 0;  // Allocate memory
+    return best_index;
+}
+
+// Worst-Fit Strategy
+int worst_fit(int size) {
+    int worst_index = -1;
+    int max_diff = -1;
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        if (memory[i].is_free && memory[i].size >= size) {
+            int diff = memory[i].size - size;
+            if (diff > max_diff) {
+                max_diff = diff;
+                worst_index = i;
+            }
+        }
+    }
+    if (worst_index != -1)
+        memory[worst_index].is_free = 0;  // Allocate memory
+    return worst_index;
+}
+
+void display_memory() {
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        printf("Block %d: Size = %d, Status = %s\n", i, memory[i].size, memory[i].is_free ? "Free" : "Occupied");
+    }
+}
+
+int main() {
+    initialize_memory();
+    display_memory();
+    int choice, size, block_num;
+
+    printf("\nEnter memory allocation strategy:\n1. First Fit\n2. Best Fit\n3. Worst Fit\n");
+    scanf("%d", &choice);
+    printf("Enter the size of memory to allocate: ");
+    scanf("%d", &size);
+
+    switch (choice) {
+        case 1:
+            block_num = first_fit(size);
+            break;
+        case 2:
+            block_num = best_fit(size);
+            break;
+        case 3:
+            block_num = worst_fit(size);
+            break;
+        default:
+            printf("Invalid choice!\n");
+            return 0;
+    }
+
+    if (block_num != -1)
+        printf("Memory allocated at Block %d\n", block_num);
+    else
+        printf("Memory allocation failed! No sufficient space.\n");
+
+    display_memory();
+    return 0;
+}

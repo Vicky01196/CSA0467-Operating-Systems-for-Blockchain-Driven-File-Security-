@@ -1,0 +1,101 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+// Thread function to demonstrate thread creation and exit
+void* thread_function(void* arg) {
+    int thread_id = *((int*)arg);
+    printf("Thread %d is running\n", thread_id);
+    sleep(2);  // Simulate some work
+    printf("Thread %d is exiting\n", thread_id);
+    pthread_exit(NULL);  // Explicitly exit the thread
+}
+
+// Function to demonstrate thread creation
+void demonstrate_create() {
+    pthread_t thread1;
+    int thread_id = 1;
+
+    // Create a new thread
+    if (pthread_create(&thread1, NULL, thread_function, &thread_id)) {
+        printf("Error creating thread\n");
+        exit(1);
+    }
+    printf("Thread created\n");
+
+    // Wait for the thread to finish
+    pthread_join(thread1, NULL);
+}
+
+// Function to demonstrate thread join
+void demonstrate_join() {
+    pthread_t thread2;
+    int thread_id = 2;
+
+    // Create a new thread
+    if (pthread_create(&thread2, NULL, thread_function, &thread_id)) {
+        printf("Error creating thread\n");
+        exit(1);
+    }
+
+    // Join the thread (wait for it to finish)
+    pthread_join(thread2, NULL);
+    printf("Thread joined\n");
+}
+
+// Function to demonstrate thread equality (same thread comparison)
+void demonstrate_equal() {
+    pthread_t thread3, thread4;
+
+    // Create two threads
+    pthread_create(&thread3, NULL, thread_function, NULL);
+    pthread_create(&thread4, NULL, thread_function, NULL);
+
+    // Compare threads (checking if they are equal)
+    if (pthread_equal(thread3, thread4)) {
+        printf("Thread 3 and Thread 4 are the same\n");
+    } else {
+        printf("Thread 3 and Thread 4 are different\n");
+    }
+
+    // Wait for both threads to finish
+    pthread_join(thread3, NULL);
+    pthread_join(thread4, NULL);
+}
+
+// Function to demonstrate thread exit
+void demonstrate_exit() {
+    pthread_t thread5;
+    int thread_id = 5;
+
+    // Create a new thread
+    if (pthread_create(&thread5, NULL, thread_function, &thread_id)) {
+        printf("Error creating thread\n");
+        exit(1);
+    }
+
+    // Wait for the thread to finish
+    pthread_join(thread5, NULL);
+    printf("Thread exited\n");
+}
+
+int main() {
+    // Demonstrate thread creation
+    printf("Demonstrating thread creation:\n");
+    demonstrate_create();
+
+    // Demonstrate thread join
+    printf("\nDemonstrating thread join:\n");
+    demonstrate_join();
+
+    // Demonstrate thread equality
+    printf("\nDemonstrating thread equality:\n");
+    demonstrate_equal();
+
+    // Demonstrate thread exit
+    printf("\nDemonstrating thread exit:\n");
+    demonstrate_exit();
+
+    return 0;
+}

@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+void create_dir(const char *dir_name) {
+    if (mkdir(dir_name, 0777) == -1) {
+        perror("Error creating directory");
+    }
+}
+
+void move_file(const char *file_name, const char *dir_name) {
+    char command[256];
+    sprintf(command, "mv %s %s/", file_name, dir_name);
+    system(command);
+}
+
+int main() {
+    char file_name[100], dir_name1[] = "dir1", dir_name2[] = "dir2";
+    
+    create_dir(dir_name1);
+    create_dir(dir_name2);
+    
+    printf("Enter the name of the file to organize: ");
+    scanf("%s", file_name);
+    
+    // Simple logic for file categorization (could be expanded)
+    if (strstr(file_name, ".txt") != NULL) {
+        move_file(file_name, dir_name1);
+    } else {
+        move_file(file_name, dir_name2);
+    }
+    
+    printf("File moved successfully.\n");
+    return 0;
+}

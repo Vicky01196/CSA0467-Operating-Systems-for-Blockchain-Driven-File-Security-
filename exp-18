@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#define MAX 5
+
+sem_t empty, full;
+int buffer[MAX];
+int in = 0, out = 0;
+
+void *producer(void *arg) {
+    for (int i = 0; i < 10; i++) {
+        sem_wait(&empty); // Decrement empty slot
+        buffer[in] = i;
+        printf("Produced: %d\n", buffer[in]);
+        in = (in + 1) % MAX;
+        sem_post(&full);  // Increment full slot
+    }
+    return NULL;
+}
+
+void *consumer(void *arg) {
+    for (int i = 0; i < 10; i++) {
+        sem_wait(&full);  // Decrement full slot
+        int item = buffer[out];
+        printf("Consumed: %d\n", item);
+        out = (out + 1) % MAX;
+        sem_post(&empty); // Increment empty slot
+    }
+    return NULL;
+}
+
+int main() {
+    sem_init(&empty, 0, MAX);  // Initialize empty slots
+    sem_init(&full, 0, 0);     // Initialize full slots
+    pthread_t prod, cons;
+
+    pthread_create(&prod, NULL, producer, NULL);
+    pthread_create(&cons, NULL, consumer, NULL);
+
+    pthread_join(prod, NULL);
+    pthread_join(cons, NULL);
+
+    sem_destroy(&empty);
+    sem_destroy(&full);
+    return 0;
+}

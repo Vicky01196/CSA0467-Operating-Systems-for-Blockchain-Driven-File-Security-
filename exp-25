@@ -1,0 +1,65 @@
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <string.h>
+#include <stdlib.h>
+
+int main() {
+    // File descriptor for fcntl, lseek, stat
+    int fd;
+    struct stat fileStat;
+
+    // Open file using fcntl
+    fd = open("example.txt", O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    if (fd == -1) {
+        perror("Error opening file");
+        exit(1);
+    }
+
+    // Using fcntl to get the file descriptor status
+    int flags = fcntl(fd, F_GETFL);
+    if (flags == -1) {
+        perror("fcntl F_GETFL failed");
+        exit(1);
+    }
+    printf("File flags: %d\n", flags);
+
+    // Using lseek to move the file pointer
+    off_t offset = lseek(fd, 10, SEEK_SET);  // Move 10 bytes forward
+    if (offset == -1) {
+        perror("lseek failed");
+        exit(1);
+    }
+    printf("File pointer moved to byte: %ld\n", offset);
+
+    // Using stat to get file information
+    if (stat("example.txt", &fileStat) == -1) {
+        perror("stat failed");
+        exit(1);
+    }
+    printf("File size: %ld bytes\n", fileStat.st_size);
+
+    // Close the file
+    close(fd);
+
+    // Using opendir and readdir to list directory contents
+    DIR *dir = opendir(".");
+    if (dir == NULL) {
+        perror("opendir failed");
+        exit(1);
+    }
+
+    struct dirent *entry;
+    printf("\nDirectory contents:\n");
+    while ((entry = readdir(dir)) != NULL) {
+        printf("%s\n", entry->d_name);
+    }
+
+    // Close the directory
+    closedir(dir);
+
+    return 0;
+}

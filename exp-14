@@ -1,0 +1,39 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dirent.h>
+
+void move_file(const char *filename, const char *dir_name) {
+    char new_path[512];
+    sprintf(new_path, "%s/%s", dir_name, filename);
+    if (rename(filename, new_path) == 0)
+        printf("Moved %s to %s\n", filename, dir_name);
+    else
+        perror("Error moving file");
+}
+
+int main() {
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(".");
+    if (d) {
+        while ((dir = readdir(d)) != NULL) {
+            if (dir->d_type == DT_REG) {
+                char *ext = strrchr(dir->d_name, '.');
+                if (ext && strlen(ext) > 1) {
+                    char dir_name[128];
+                    snprintf(dir_name, sizeof(dir_name), "%s_files", ext + 1);
+                    if (mkdir(dir_name, 0777) && errno != EEXIST) {
+                        perror("Error creating directory");
+                        continue;
+                    }
+                    move_file(dir->d_name, dir_name);
+                }
+            }
+        }
+        closedir(d);
+    } else {
+        perror("Error opening directory");
+    }
+    return 0;
+}
